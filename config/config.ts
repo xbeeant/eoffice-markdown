@@ -29,12 +29,13 @@ export default defineConfig({
   ignoreMomentLocale: true,
   proxy: proxy[REACT_APP_ENV || 'dev'],
   manifest: {
-    basePath: '/',
+    basePath: '/e-markdown',
   },
+  publicPath: '/e-markdown/',
+  base: '/e-markdown',
   // Fast Refresh 热更新
   fastRefresh: {},
   nodeModulesTransform: {type: 'none'},
-  mfsu: {},
   webpack5: {},
   exportStatic: {},
   qiankun: {

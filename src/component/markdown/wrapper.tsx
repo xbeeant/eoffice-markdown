@@ -41,6 +41,7 @@ const defaultConfig = {
   theme: 'light',
   previewTheme: 'light',
   editorTheme: 'pastel-on-dark',
+  path: '/',
   codeFold: true,
   syncScrolling: false,
   saveHTMLToTextarea: true,    // 保存 HTML 到 Textarea
@@ -75,6 +76,7 @@ const MarkdownWrapper = ( props: MarkdownEditorWrapperProps) => {
       taskList, tocm, tex, flowChart, sequenceDiagram, dialogLockScreen, dialogShowMask, dialogDraggable,
       dialogMaskOpacity, dialogMaskBgColor, imageUpload, imageFormats, imageUploadURL, onload
     } = mdconfig;
+
     // @ts-ignore
     const editor = editormd(mdconfig.id, {
       width: width,

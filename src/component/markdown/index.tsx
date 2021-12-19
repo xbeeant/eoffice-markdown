@@ -17,7 +17,7 @@ const MarkdownEditor = (props: MarkdownEditorProps) => {
   const { value, mode } = props;
   const config: MarkdownEditorWrapperProps = {
     imageUploadURL: '',
-    path: '',
+    path: '//localhost:8002/e-markdown/',
     markdown: value,
     onload: (editor, func) => {
       // @ts-ignore
