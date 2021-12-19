@@ -1,15 +1,18 @@
+import type { PermissionProps } from '@/component/markdown';
 import MarkdownEditor from '@/component/markdown';
 
 import { useEffect, useState } from 'react';
 import { request } from 'umi';
 import { Skeleton } from 'antd';
-import type { PermissionProps } from '@/component/markdown';
 
 interface LocationProps extends Location {
-  query: { rid: string, aid: string };
+  query: { rid: string; sid: string };
 }
 
 const Index: ({ location }: { location: LocationProps }) => JSX.Element = ({ location }) => {
+  const {
+    query: { rid, sid },
+  } = location;
   const [loading, setLoading] = useState<boolean>(true);
   const [data, setData] = useState<string>('');
   const [permission, setPermission] = useState<PermissionProps>({
@@ -23,7 +26,7 @@ const Index: ({ location }: { location: LocationProps }) => JSX.Element = ({ loc
     setLoading(true);
     const response = await request('/api/resource/detail', {
       params: {
-        rid: location.query.rid,
+        rid,
       },
     });
     if (response.success) {
@@ -41,20 +44,35 @@ const Index: ({ location }: { location: LocationProps }) => JSX.Element = ({ loc
 
   useEffect(() => {
     loadData().then(() => setLoading(false));
-  }, [location.query.aid]);
+  }, [sid]);
 
   return (
     <div>
       {loading && <Skeleton />}
-      {!loading &&
+      {!loading && (
         <div
           style={{
             height: '100%',
           }}
         >
-          <MarkdownEditor value={data} mode={permission.edit ? 'edit' : 'view'} />
+          <MarkdownEditor
+            value={data}
+            rid={rid}
+            imageUploadURL={'/api/resource/detail'}
+            mode={permission.edit ? 'edit' : 'view'}
+            onSave={(value) => {
+              request('/api/resource', {
+                method: 'POST',
+                requestType: 'form',
+                data: {
+                  rid,
+                  value,
+                },
+              });
+            }}
+          />
         </div>
-      }
+      )}
     </div>
   );
 };

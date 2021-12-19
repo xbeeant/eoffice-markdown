@@ -31,91 +31,124 @@ export interface MarkdownEditorWrapperProps {
   imageUpload?: boolean;
   imageFormats?: string[];
   imageUploadURL: string;
-  onload?: (editor: unknown, e: unknown) => void;
+  onEditorload?: (editor: object) => void;
+  toolbarIcons?: 'full' | 'simple' | 'mini' | Function;
+  toolbarIconsClass?: object;
+  toolbarHandlers?: object;
+  toolbarCustomIcons?: object;
 }
 
 const defaultConfig = {
   id: `editormd-${new Date().getTime()}`,
+  mode: 'gfm', // gfm or markdown
+  name: '', // Form element name for post
+  value: '', // value for CodeMirror, if mode not gfm/markdown
+  theme: '', // Editor.md self themes, before v1.5.0 is CodeMirror theme, default empty
+  editorTheme: 'default', // Editor area, this is CodeMirror theme at v1.5.0
+  previewTheme: '', // Preview area theme, default empty
+  markdown: '', // Markdown source code
+  appendMarkdown: '', // if in init textarea value not empty, append markdown to textarea
   width: '100%',
   height: 740,
-  theme: 'light',
-  previewTheme: 'light',
-  editorTheme: 'pastel-on-dark',
-  path: '/',
-  codeFold: true,
-  syncScrolling: false,
-  saveHTMLToTextarea: true,    // 保存 HTML 到 Textarea
-  searchReplace: true,
-  watch: true,                // 实时预览
-  htmlDecode: 'style,script,iframe|on*',            // 开启 HTML 标签解析，为了安全性，默认不开启
-  toolbar: true,             //关闭工具栏
-  previewCodeHighlight: true, // 关闭预览 HTML 的代码块高亮，默认开启
-  emoji: true,
-  taskList: true,
-  tocm: true,                  // Using [TOCM]
-  tex: true,                   // 开启科学公式TeX语言支持，默认关闭
-  flowChart: true,             // 开启流程图支持，默认关闭
-  sequenceDiagram: true,       // 开启时序/序列图支持，默认关闭,
-  dialogLockScreen: true,     // 设置弹出层对话框不锁屏，全局通用，默认为true
-  dialogShowMask: true,       // 设置弹出层对话框显示透明遮罩层，全局通用，默认为true
-  dialogDraggable: true,      // 设置弹出层对话框不可拖动，全局通用，默认为true
-  dialogMaskOpacity: 0.4,     // 设置透明遮罩层的透明度，全局通用，默认值为0.1
-  dialogMaskBgColor: '#000',  // 设置透明遮罩层的背景颜色，全局通用，默认为#fff
-  imageUpload: true,
+  path: './lib/', // Dependents module file directory
+  pluginPath: '', // If this empty, default use settings.path + "../plugins/"
+  delay: 300, // Delay parse markdown to html, Uint : ms
+  autoLoadModules: true, // Automatic load dependent module files
+  watch: true,
+  placeholder: 'Enjoy Markdown! coding now...',
+  gotoLine: true, // Enable / disable goto a line
+  codeFold: false,
+  autoHeight: false,
+  autoFocus: true, // Enable / disable auto focus editor left input area
+  autoCloseTags: true,
+  searchReplace: true, // Enable / disable (CodeMirror) search and replace function
+  syncScrolling: true, // options: true | false | "single", default true
+  readOnly: false, // Enable / disable readonly mode
+  tabSize: 4,
+  indentUnit: 4,
+  lineNumbers: true, // Display editor line numbers
+  lineWrapping: true,
+  autoCloseBrackets: true,
+  showTrailingSpace: true,
+  matchBrackets: true,
+  indentWithTabs: true,
+  styleSelectedText: true,
+  matchWordHighlight: true, // options: true, false, "onselected"
+  styleActiveLine: true, // Highlight the current line
+  dialogLockScreen: true,
+  dialogShowMask: true,
+  dialogDraggable: true,
+  dialogMaskBgColor: '#fff',
+  dialogMaskOpacity: 0.1,
+  fontSize: '13px',
+  saveHTMLToTextarea: false, // If enable, Editor will create a <textarea name="{editor-id}-html-code"> tag save HTML code for form post to server-side.
+  disabledKeyMaps: [],
+  onload: function () {},
+  onresize: function () {},
+  onchange: function () {},
+  onwatch: null,
+  onunwatch: null,
+  onpreviewing: function () {},
+  onpreviewed: function () {},
+  onfullscreen: function () {},
+  onfullscreenExit: function () {},
+  onscroll: function () {},
+  onpreviewscroll: function () {},
+
+  imageUpload: false, // Enable/disable upload
   imageFormats: ['jpg', 'jpeg', 'gif', 'png', 'bmp', 'webp'],
-  onload: () => {}
+  imageUploadURL: '', // Upload url
+  crossDomainUpload: false, // Enable/disable Cross-domain upload
+  uploadCallbackURL: '', // Cross-domain upload callback url
+
+  toc: true, // Table of contents
+  tocm: false, // Using [TOCM], auto create ToC dropdown menu
+  tocTitle: '', // for ToC dropdown menu button
+  tocDropdown: false, // Enable/disable Table Of Contents dropdown menu
+  tocContainer: '', // Custom Table Of Contents Container Selector
+  tocStartLevel: 1, // Said from H1 to create ToC
+  htmlDecode: false, // Open the HTML tag identification
+  pageBreak: true, // Enable parse page break [========]
+  atLink: true, // for @link
+  emailLink: true, // for email address auto link
+  taskList: false, // Enable Github Flavored Markdown task lists
+  emoji: false, // :emoji: , Support Github emoji, Twitter Emoji (Twemoji);
+  // Support FontAwesome icon emoji :fa-xxx: > Using fontAwesome icon web fonts;
+  // Support Editor.md logo icon emoji :editormd-logo: :editormd-logo-1x: > 1~8x;
+  tex: false, // TeX(LaTeX), based on KaTeX
+  flowChart: false, // flowChart.js only support IE9+
+  sequenceDiagram: false, // sequenceDiagram.js only support IE9+
+  previewCodeHighlight: true, // Enable / disable code highlight of editor preview area
+
+  toolbar: true, // show or hide toolbar
+  toolbarAutoFixed: true, // on window scroll auto fixed position
+  toolbarIcons: 'full',
+  toolbarTitles: {},
+  toolbarCustomIcons: {},
+  toolbarIconTexts: {},
+  lang: {
+    // Language data, you can custom your language.
+    name: 'zh-cn',
+  },
 };
 
-const MarkdownWrapper = ( props: MarkdownEditorWrapperProps) => {
+const MarkdownWrapper = (props: MarkdownEditorWrapperProps) => {
+  const { onEditorload } = props;
   const mdconfig: MarkdownEditorWrapperProps = Object.assign({}, defaultConfig, props);
 
   useEffect(() => {
-    const {
-      width, height, path, theme, previewTheme, editorTheme, markdown, codeFold, syncScrolling,
-      saveHTMLToTextarea, searchReplace, watch, htmlDecode, toolbar, previewCodeHighlight, emoji,
-      taskList, tocm, tex, flowChart, sequenceDiagram, dialogLockScreen, dialogShowMask, dialogDraggable,
-      dialogMaskOpacity, dialogMaskBgColor, imageUpload, imageFormats, imageUploadURL, onload
-    } = mdconfig;
-
     // @ts-ignore
     const editor = editormd(mdconfig.id, {
-      width: width,
-      height: height,
-      path: path,
-      theme: theme,
-      previewTheme: previewTheme,
-      editorTheme: editorTheme,
-      markdown: markdown,
-      codeFold: codeFold,
-      syncScrolling: syncScrolling,
-      saveHTMLToTextarea: saveHTMLToTextarea,    // 保存 HTML 到 Textarea
-      searchReplace: searchReplace,
-      watch: watch,                // 关闭实时预览
-      htmlDecode: htmlDecode,            // 开启 HTML 标签解析，为了安全性，默认不开启
-      toolbar: toolbar,             //关闭工具栏
-      previewCodeHighlight: previewCodeHighlight, // 关闭预览 HTML 的代码块高亮，默认开启
-      emoji: emoji,
-      taskList: taskList,
-      tocm: tocm,         // Using [TOCM]
-      tex: tex,                   // 开启科学公式TeX语言支持，默认关闭
-      flowChart: flowChart,             // 开启流程图支持，默认关闭
-      sequenceDiagram: sequenceDiagram,       // 开启时序/序列图支持，默认关闭,
-      dialogLockScreen: dialogLockScreen,   // 设置弹出层对话框不锁屏，全局通用，默认为true
-      dialogShowMask: dialogShowMask,     // 设置弹出层对话框显示透明遮罩层，全局通用，默认为true
-      dialogDraggable: dialogDraggable,    // 设置弹出层对话框不可拖动，全局通用，默认为true
-      dialogMaskOpacity: dialogMaskOpacity,    // 设置透明遮罩层的透明度，全局通用，默认值为0.1
-      dialogMaskBgColor: dialogMaskBgColor, // 设置透明遮罩层的背景颜色，全局通用，默认为#fff
-      imageUpload: imageUpload,
-      imageFormats: imageFormats,
-      imageUploadURL: imageUploadURL,
+      ...mdconfig,
       onload: () => {
-        if (onload) {
-          onload(editor, this);
+        if (onEditorload) {
+          onEditorload(editor);
         }
-      }
+      },
     });
-  },[])
-  return (<div id={mdconfig.id} />);
+  }, []);
+
+  return <div id={mdconfig.id} />;
 };
 
 export default MarkdownWrapper;
