@@ -3,7 +3,7 @@ import MarkdownEditor from '@/component/markdown';
 
 import { useEffect, useState } from 'react';
 import { request } from 'umi';
-import { Skeleton } from 'antd';
+import { Skeleton, message } from 'antd';
 
 interface LocationProps extends Location {
   query: { rid: string; sid: string };
@@ -11,7 +11,7 @@ interface LocationProps extends Location {
 
 const Index: ({ location }: { location: LocationProps }) => JSX.Element = ({ location }) => {
   const {
-    query: { rid, sid },
+    query: { rid },
   } = location;
   const [loading, setLoading] = useState<boolean>(true);
   const [data, setData] = useState<string>('');
@@ -44,7 +44,7 @@ const Index: ({ location }: { location: LocationProps }) => JSX.Element = ({ loc
 
   useEffect(() => {
     loadData().then(() => setLoading(false));
-  }, [sid]);
+  }, [rid]);
 
   return (
     <div>
@@ -68,6 +68,12 @@ const Index: ({ location }: { location: LocationProps }) => JSX.Element = ({ loc
                   rid,
                   value,
                 },
+              }).then(response => {
+                if(response.success) {
+                  message.success(response.msg);
+                } else {
+                  message.error(response.msg);
+                }
               });
             }}
           />
