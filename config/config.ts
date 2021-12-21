@@ -1,9 +1,9 @@
 // https://umijs.org/config/
-import {defineConfig} from 'umi';
+import { defineConfig } from 'umi';
 import routes from './routes';
 import proxy from './proxy';
 
-const {REACT_APP_ENV} = process.env;
+const { REACT_APP_ENV } = process.env;
 
 export default defineConfig({
   hash: true,
@@ -29,13 +29,13 @@ export default defineConfig({
   ignoreMomentLocale: true,
   proxy: proxy[REACT_APP_ENV || 'dev'],
   manifest: {
-    basePath: '/e-markdown',
+    basePath: '/markdown',
   },
-  publicPath: '/e-markdown/',
-  base: '/e-markdown',
+  publicPath: '/markdown/',
+  base: '/markdown',
   // Fast Refresh 热更新
   fastRefresh: {},
-  nodeModulesTransform: {type: 'none'},
+  nodeModulesTransform: { type: 'none' },
   webpack5: {},
   exportStatic: {},
   qiankun: {

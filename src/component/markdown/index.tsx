@@ -21,7 +21,8 @@ const MarkdownEditor = (props: MarkdownEditorProps) => {
   const config: MarkdownEditorWrapperProps = {
     imageUpload: true,
     imageUploadURL: './api/resource/attachment?rid=' + rid,
-    path: '//localhost:8002/e-markdown/',
+    // todo 部署的时候，需要把路径替换成实际的域名及地址
+    path: '//localhost/markdown/',
     markdown: value,
     onEditorload: (editor) => {
       const keyMap = {

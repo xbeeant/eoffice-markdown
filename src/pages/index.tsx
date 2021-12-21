@@ -3,7 +3,7 @@ import MarkdownEditor from '@/component/markdown';
 
 import { useEffect, useState } from 'react';
 import { request } from 'umi';
-import { Skeleton, message } from 'antd';
+import { message, Skeleton } from 'antd';
 
 interface LocationProps extends Location {
   query: { rid: string; sid: string };
@@ -24,21 +24,23 @@ const Index: ({ location }: { location: LocationProps }) => JSX.Element = ({ loc
 
   const loadData = async () => {
     setLoading(true);
-    const response = await request('/api/resource/detail', {
-      params: {
-        rid,
-      },
-    });
-    if (response.success) {
-      setPermission({
-        copy: true,
-        print: true,
-        download: true,
-        edit: true,
+    if (rid) {
+      const response = await request('/api/resource/detail', {
+        params: {
+          rid,
+        },
       });
-      // load content from url
-      const downloaded = await request(response.data.url);
-      setData(downloaded);
+      if (response.success) {
+        setPermission({
+          copy: true,
+          print: true,
+          download: true,
+          edit: true,
+        });
+        // load content from url
+        const downloaded = await request(response.data.url);
+        setData(downloaded);
+      }
     }
   };
 
@@ -49,36 +51,39 @@ const Index: ({ location }: { location: LocationProps }) => JSX.Element = ({ loc
   return (
     <div>
       {loading && <Skeleton />}
-      {!loading && (
-        <div
-          style={{
-            height: '100%',
-          }}
-        >
-          <MarkdownEditor
-            value={data}
-            rid={rid}
-            imageUploadURL={'/api/resource/detail'}
-            mode={permission.edit ? 'edit' : 'view'}
-            onSave={(value) => {
-              request('/api/resource', {
-                method: 'POST',
-                requestType: 'form',
-                data: {
-                  rid,
-                  value,
-                },
-              }).then(response => {
-                if(response.success) {
-                  message.success(response.msg);
-                } else {
-                  message.error(response.msg);
-                }
-              });
+      {!loading &&
+        (rid ? (
+          <div
+            style={{
+              height: '100%',
             }}
-          />
-        </div>
-      )}
+          >
+            <MarkdownEditor
+              value={data}
+              rid={rid}
+              imageUploadURL={'/api/resource/detail'}
+              mode={permission.edit ? 'edit' : 'view'}
+              onSave={(value) => {
+                request('/api/resource', {
+                  method: 'POST',
+                  requestType: 'form',
+                  data: {
+                    rid,
+                    value,
+                  },
+                }).then((response) => {
+                  if (response.success) {
+                    message.success(response.msg);
+                  } else {
+                    message.error(response.msg);
+                  }
+                });
+              }}
+            />
+          </div>
+        ) : (
+          <div>参数不全</div>
+        ))}
     </div>
   );
 };
