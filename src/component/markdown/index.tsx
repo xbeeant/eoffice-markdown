@@ -18,11 +18,12 @@ export interface MarkdownEditorProps {
 
 const MarkdownEditor = (props: MarkdownEditorProps) => {
   const { value, mode, onSave, rid } = props;
+  const host = window.location.host ;
+
   const config: MarkdownEditorWrapperProps = {
     imageUpload: true,
     imageUploadURL: './api/resource/attachment?rid=' + rid,
-    // todo 部署的时候，需要把路径替换成实际的域名及地址
-    path: '//localhost/markdown/',
+    path: `${host}/markdown/`,
     markdown: value,
     onEditorload: (editor) => {
       const keyMap = {
@@ -92,10 +93,10 @@ const MarkdownEditor = (props: MarkdownEditorProps) => {
       },
     },
   };
-  if ('edit' === mode) {
-    return <MarkdownWrapper {...config} />;
+  if ('edit' !== mode) {
+    config.toolbar = false;
   }
-  return <div>show mode</div>;
+  return <MarkdownWrapper {...config} />;
 };
 
 export default MarkdownEditor;
