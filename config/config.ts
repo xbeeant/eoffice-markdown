@@ -2,6 +2,7 @@
 import { defineConfig } from 'umi';
 import routes from './routes';
 import proxy from './proxy';
+import defaultSettings from './defaultSettings';
 
 const { REACT_APP_ENV } = process.env;
 
@@ -29,8 +30,9 @@ export default defineConfig({
   ignoreMomentLocale: true,
   proxy: proxy[REACT_APP_ENV || 'dev'],
   manifest: {
-    basePath: '/markdown',
+    basePath: '/markdown/',
   },
+  title: defaultSettings.title,
   publicPath: '/markdown/',
   base: '/markdown',
   // Fast Refresh 热更新
@@ -38,7 +40,4 @@ export default defineConfig({
   nodeModulesTransform: { type: 'none' },
   webpack5: {},
   exportStatic: {},
-  qiankun: {
-    slave: {},
-  },
 });

@@ -18,12 +18,13 @@ export interface MarkdownEditorProps {
 
 const MarkdownEditor = (props: MarkdownEditorProps) => {
   const { value, mode, onSave, rid } = props;
-  const host = window.location.host ;
+  const host = window.location.host;
+  const protocol = window.location.protocol;
 
   const config: MarkdownEditorWrapperProps = {
     imageUpload: true,
     imageUploadURL: './api/resource/attachment?rid=' + rid,
-    path: `${host}/markdown/`,
+    path: `${protocol}//${host}/markdown/`,
     markdown: value,
     onEditorload: (editor) => {
       const keyMap = {
