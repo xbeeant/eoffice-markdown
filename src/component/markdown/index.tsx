@@ -1,12 +1,6 @@
 import type { MarkdownEditorWrapperProps } from '@/component/markdown/wrapper';
 import MarkdownWrapper from '@/component/markdown/wrapper';
-
-export interface PermissionProps {
-  copy: boolean;
-  print: boolean;
-  download: boolean;
-  edit: boolean;
-}
+import defaultSettings from '../../../config/defaultSettings';
 
 export interface MarkdownEditorProps {
   value: string;
@@ -18,11 +12,13 @@ export interface MarkdownEditorProps {
 
 const MarkdownEditor = (props: MarkdownEditorProps) => {
   const { value, mode, onSave, rid } = props;
+  const host = window.location.host;
+  const protocol = window.location.protocol;
+
   const config: MarkdownEditorWrapperProps = {
     imageUpload: true,
     imageUploadURL: './api/resource/attachment?rid=' + rid,
-    // todo 部署的时候，需要把路径替换成实际的域名及地址
-    path: '//localhost/markdown/',
+    path: `${protocol}//${host}${defaultSettings.basepath}/`,
     markdown: value,
     onEditorload: (editor) => {
       const keyMap = {
@@ -92,10 +88,10 @@ const MarkdownEditor = (props: MarkdownEditorProps) => {
       },
     },
   };
-  if ('edit' === mode) {
-    return <MarkdownWrapper {...config} />;
+  if ('edit' !== mode) {
+    config.toolbar = false;
   }
-  return <div>show mode</div>;
+  return <MarkdownWrapper {...config} />;
 };
 
 export default MarkdownEditor;

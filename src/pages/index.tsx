@@ -1,45 +1,45 @@
-import type { PermissionProps } from '@/component/markdown';
 import MarkdownEditor from '@/component/markdown';
 
 import { useEffect, useState } from 'react';
 import { request } from 'umi';
-import { message, Skeleton } from 'antd';
+import { message, Result, Skeleton } from 'antd';
+import { ApiResponse } from '@/types';
 
 interface LocationProps extends Location {
-  query: { rid: string; sid: string };
+  query: { rid: string; share: string; mode: 'view' | 'edit'; shareId: string };
 }
 
 const Index: ({ location }: { location: LocationProps }) => JSX.Element = ({ location }) => {
   const {
-    query: { rid },
+    query: { rid, share, mode, shareId },
   } = location;
+
   const [loading, setLoading] = useState<boolean>(true);
   const [data, setData] = useState<string>('');
-  const [permission, setPermission] = useState<PermissionProps>({
-    copy: true,
-    print: true,
-    download: true,
-    edit: true,
-  });
+  const [viewMode, setViewMode] = useState<'view' | 'edit'>(mode);
+  const [error, setError] = useState<string>();
 
   const loadData = async () => {
     setLoading(true);
-    if (rid) {
-      const response = await request('/api/resource/detail', {
+    if (rid || share) {
+      const response = await request<ApiResponse>('/api/resource/detail', {
         params: {
           rid,
+          share,
+          shareId,
         },
+        skipErrorHandler: true,
       });
+
       if (response.success) {
-        setPermission({
-          copy: true,
-          print: true,
-          download: true,
-          edit: true,
-        });
+        if (mode === 'edit' && !response.data.perm.edit) {
+          setViewMode('view');
+        }
         // load content from url
         const downloaded = await request(response.data.url);
         setData(downloaded);
+      } else {
+        setError(response.msg);
       }
     }
   };
@@ -48,42 +48,47 @@ const Index: ({ location }: { location: LocationProps }) => JSX.Element = ({ loc
     loadData().then(() => setLoading(false));
   }, [rid]);
 
+  const renderResult = () => {
+    if (error) {
+      return <Result status="error" title={error} />;
+    }
+
+    return (
+      <div
+        style={{
+          height: '100%',
+        }}
+      >
+        <MarkdownEditor
+          value={data}
+          rid={rid}
+          imageUploadURL={'/api/resource/detail'}
+          mode={viewMode}
+          onSave={(value) => {
+            request('/api/resource', {
+              method: 'POST',
+              requestType: 'form',
+              data: {
+                rid,
+                value,
+              },
+            }).then((response) => {
+              if (response.success) {
+                message.success(response.msg);
+              } else {
+                message.error(response.msg);
+              }
+            });
+          }}
+        />
+      </div>
+    );
+  };
+
   return (
     <div>
       {loading && <Skeleton />}
-      {!loading &&
-        (rid ? (
-          <div
-            style={{
-              height: '100%',
-            }}
-          >
-            <MarkdownEditor
-              value={data}
-              rid={rid}
-              imageUploadURL={'/api/resource/detail'}
-              mode={permission.edit ? 'edit' : 'view'}
-              onSave={(value) => {
-                request('/api/resource', {
-                  method: 'POST',
-                  requestType: 'form',
-                  data: {
-                    rid,
-                    value,
-                  },
-                }).then((response) => {
-                  if (response.success) {
-                    message.success(response.msg);
-                  } else {
-                    message.error(response.msg);
-                  }
-                });
-              }}
-            />
-          </div>
-        ) : (
-          <div>参数不全</div>
-        ))}
+      {!loading && (rid || share) ? renderResult() : <div>参数不全</div>}
     </div>
   );
 };
